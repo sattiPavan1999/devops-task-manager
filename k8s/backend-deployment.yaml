@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: pavanreddy1999/taskmanager-backend:v1
+          image: pavanreddy1999/taskmanager-backend:v3
 
           ports:
             - containerPort: 5000
