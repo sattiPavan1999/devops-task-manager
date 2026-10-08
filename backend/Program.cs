@@ -24,13 +24,16 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new() { Title = "Task Manager API", Version = "v1" });
 });
 
-// 4. CORS Policy for Frontend (Vite default: http://localhost:5173)
+// 4. CORS Policy for Frontend (Supports Vite local dev on 5173 and Docker container on 3000)
 const string CorsPolicy = "FrontendPolicy";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: CorsPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+                  "http://localhost:5173", 
+                  "http://localhost:3000"
+              )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -38,18 +41,26 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// 5. Seed Data in Development (Does not apply auto-migrations; assumes migration is executed)
+// 5. Auto-Migrate and Seed Data
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<TaskDbContext>();
+    var services = scope.ServiceProvider;
     try
     {
+        var dbContext = services.GetRequiredService<TaskDbContext>();
+
+        // Automatically creates database and applies pending migrations if missing
+        await dbContext.Database.MigrateAsync();
+
+        // Seeds initial sample tasks once tables exist
         await DbInitializer.SeedAsync(dbContext);
+
+        app.Logger.LogInformation("Database migration and seeding completed successfully.");
     }
     catch (Exception ex)
     {
-        app.Logger.LogWarning(ex, "Could not seed database. Ensure migrations are applied first.");
+        app.Logger.LogError(ex, "An error occurred while migrating or seeding the database.");
     }
 
     app.UseSwagger();
@@ -58,6 +69,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(CorsPolicy);
 app.UseAuthorization();
-app.MapControllers();
+MapControllersEndpoints(app);
 
 app.Run();
+
+void MapControllersEndpoints(WebApplication webApp)
+{
+    webApp.MapControllers();
+}
