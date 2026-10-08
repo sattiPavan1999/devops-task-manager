@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: pavanreddy1999/taskmanager-frontend:7
+          image: pavanreddy1999/taskmanager-frontend:8
 
           ports:
             - containerPort: 80

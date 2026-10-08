@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: pavanreddy1999/taskmanager-db:7
+          image: pavanreddy1999/taskmanager-db:8
 
           ports:
             - containerPort: 5432
