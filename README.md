@@ -105,3 +105,19 @@ Start the processes in this order:
 2. **Backend**: `cd backend && dotnet run --urls=http://localhost:5000`
 3. **Frontend**: `cd frontend && npm run dev`
 4. **Browser**: Open `http://localhost:5173` to test adding, toggling, editing, and deleting tasks.
+
+## 6. Running the Backend in Docker
+
+Containers on the same Docker network must connect using the database container name, not `localhost` (`localhost` inside the backend container refers to the backend itself). With the database container named `taskmanager-db` and both containers attached to `taskmanager-net`, run:
+
+```powershell
+docker run -d --name backend-service --network taskmanager-net -p 5000:5000 `
+  -e POSTGRES_HOST=taskmanager-db `
+  -e POSTGRES_PORT=5432 `
+  -e POSTGRES_DB=taskmanagerdb `
+  -e POSTGRES_USER=taskuser `
+  -e POSTGRES_PASSWORD=taskpassword `
+  taskmanager-backend:latest
+```
+
+For production deployments, provide the database password through a secret rather than placing it directly in a command or manifest.

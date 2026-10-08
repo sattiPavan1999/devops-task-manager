@@ -6,8 +6,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Pass API URL at build time (or default to port 5000)
-ARG VITE_API_BASE_URL=http://localhost:5000
+# Allow overriding the API URL at build time; default to same-origin requests for Kubernetes.
+ARG VITE_API_BASE_URL=
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Copy source and compile production bundle
